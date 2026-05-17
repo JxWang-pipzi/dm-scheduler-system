@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.OrderMapper">
+    <resultMap id="orderMap" type="com.example.dm.entity.Order">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="total_price" property="totalPrice"/>
+        <result column="status" property="status"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="pay_method" property="payMethod"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="orderMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="orderMap">
+        SELECT * FROM orders WHERE order_no = #{orderNo}
+    </select>
+    
+    <select id="selectByUserId" resultMap="orderMap">
+        SELECT * FROM orders WHERE user_id = #{userId}
+        ORDER BY create_time DESC, id DESC
+    </select>
+    
+    <select id="selectBySessionId" resultMap="orderMap">
+        SELECT * FROM orders WHERE session_id = #{sessionId}
+    </select>
+    
+    <select id="selectAll" resultMap="orderMap">
+        SELECT * FROM orders ORDER BY create_time DESC, id DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="orderMap">
+        SELECT o.* FROM orders o
+        LEFT JOIN `user` u ON o.user_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (o.order_no LIKE CONCAT('%', #{keyword}, '%')
+                OR u.username LIKE CONCAT('%', #{keyword}, '%')
+                OR u.real_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">
+                AND o.status = #{status}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC, o.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM orders o
+        LEFT JOIN `user` u ON o.user_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (o.order_no LIKE CONCAT('%', #{keyword}, '%')
+                OR u.username LIKE CONCAT('%', #{keyword}, '%')
+                OR u.real_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">
+                AND o.status = #{status}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders(order_no, user_id, session_id, total_price, status, pay_time, pay_method, remark)
+        VALUES(#{orderNo}, #{userId}, #{sessionId}, #{totalPrice}, #{status}, #{payTime}, #{payMethod}, #{remark})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Order">
+        UPDATE orders
+        <set>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="sessionId != null">session_id = #{sessionId},</if>
+            <if test="totalPrice != null">total_price = #{totalPrice},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="payMethod != null">pay_method = #{payMethod},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM orders WHERE id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+target/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Test
+coverage/
+cypress/videos/
+cypress/screenshots/
+
+# Java
+*.class
+*.jar
+
+# Temp
+*.tmp
+*.bak

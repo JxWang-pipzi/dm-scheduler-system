@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.DmMapper">
+    <resultMap id="dmMap" type="com.example.dm.entity.Dm">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="dm_level" property="dmLevel"/>
+        <result column="experience" property="experience"/>
+        <result column="rating" property="rating"/>
+        <result column="status" property="status"/>
+        <result column="specialty" property="specialty"/>
+        <result column="total_sessions" property="totalSessions"/>
+        <result column="weekly_max_sessions" property="weeklyMaxSessions"/>
+        <result column="bio" property="bio"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="dmMap">
+        SELECT * FROM dm WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" resultMap="dmMap">
+        SELECT * FROM dm WHERE user_id = #{userId}
+    </select>
+    
+    <select id="selectAll" resultMap="dmMap">
+        SELECT * FROM dm ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectByLevel" resultMap="dmMap">
+        SELECT * FROM dm WHERE dm_level >= #{level}
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+
+    <!-- 查询可用DM（按等级过滤） -->
+    <select id="selectAvailableByLevel" resultMap="dmMap">
+        SELECT * FROM dm WHERE dm_level >= #{level} AND status = 'AVAILABLE' ORDER BY rating DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="dmMap">
+        SELECT d.* FROM dm d LEFT JOIN `user` u ON d.user_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (u.real_name LIKE CONCAT('%', #{keyword}, '%')
+                OR d.specialty LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">
+                AND d.status = #{status}
+            </if>
+        </where>
+        ORDER BY IFNULL(d.updated_at, d.created_at) DESC, d.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM dm d LEFT JOIN `user` u ON d.user_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (u.real_name LIKE CONCAT('%', #{keyword}, '%')
+                OR d.specialty LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">
+                AND d.status = #{status}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Dm" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dm(user_id, dm_level, experience, rating, status, specialty, total_sessions, weekly_max_sessions, bio)
+        VALUES(#{userId}, #{dmLevel}, #{experience}, #{rating}, #{status}, #{specialty}, #{totalSessions}, #{weeklyMaxSessions}, #{bio})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Dm">
+        UPDATE dm
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="dmLevel != null">dm_level = #{dmLevel},</if>
+            <if test="experience != null">experience = #{experience},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="specialty != null">specialty = #{specialty},</if>
+            <if test="totalSessions != null">total_sessions = #{totalSessions},</if>
+            <if test="weeklyMaxSessions != null">weekly_max_sessions = #{weeklyMaxSessions},</if>
+            <if test="bio != null">bio = #{bio},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM dm WHERE id = #{id}
+    </delete>
+</mapper>

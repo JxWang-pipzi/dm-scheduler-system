@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.SessionMapper">
+    <resultMap id="sessionMap" type="com.example.dm.entity.Session">
+        <id column="id" property="id"/>
+        <result column="script_id" property="scriptId"/>
+        <result column="dm_id" property="dmId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="status" property="status"/>
+        <result column="max_players" property="maxPlayers"/>
+        <result column="current_players" property="currentPlayers"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="sessionMap">
+        SELECT * FROM game_session WHERE id = #{id}
+    </select>
+    
+    <select id="selectAll" resultMap="sessionMap">
+        SELECT * FROM game_session ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectByDmId" resultMap="sessionMap">
+        SELECT * FROM game_session WHERE dm_id = #{dmId}
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectByTimeRange" resultMap="sessionMap">
+        SELECT * FROM game_session
+        WHERE (start_time BETWEEN #{startTime} AND #{endTime})
+        OR (end_time BETWEEN #{startTime} AND #{endTime})
+        OR (start_time &lt;= #{startTime} AND end_time &gt;= #{endTime})
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="sessionMap">
+        SELECT gs.* FROM game_session gs
+        LEFT JOIN script s ON gs.script_id = s.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND s.script_name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                <choose>
+                    <when test="status == 'ONGOING' or status == 'IN_PROGRESS'">
+                        AND UPPER(gs.status) IN ('ONGOING', 'IN_PROGRESS')
+                    </when>
+                    <otherwise>
+                        AND gs.status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND gs.start_time >= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND gs.end_time &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY IFNULL(gs.updated_at, gs.created_at) DESC, gs.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM game_session gs
+        LEFT JOIN script s ON gs.script_id = s.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND s.script_name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                <choose>
+                    <when test="status == 'ONGOING' or status == 'IN_PROGRESS'">
+                        AND UPPER(gs.status) IN ('ONGOING', 'IN_PROGRESS')
+                    </when>
+                    <otherwise>
+                        AND gs.status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND gs.start_time >= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND gs.end_time &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <!-- 按状态统计场次数 -->
+    <select id="countByStatus" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM game_session
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Session" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game_session(script_id, dm_id, start_time, end_time, status, max_players, current_players)
+        VALUES(#{scriptId}, #{dmId}, #{startTime}, #{endTime}, #{status}, #{maxPlayers}, #{currentPlayers})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Session">
+        UPDATE game_session
+        <set>
+            <if test="scriptId != null">script_id = #{scriptId},</if>
+            <if test="dmId != null">dm_id = #{dmId},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="maxPlayers != null">max_players = #{maxPlayers},</if>
+            <if test="currentPlayers != null">current_players = #{currentPlayers},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM game_session WHERE id = #{id}
+    </delete>
+</mapper>

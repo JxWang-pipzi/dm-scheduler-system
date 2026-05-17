@@ -1,0 +1,27 @@
+server:
+  port: 8081
+spring:
+  jackson:
+    time-zone: Asia/Shanghai
+  datasource:
+    url: jdbc:mysql://localhost:3306/dm_scheduler?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: REMOVED_PASSWORD
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.dm.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 增加H2内存数据库配置（用于开发测试）
+# spring:
+#   datasource:
+#     url: jdbc:h2:mem:testdb
+#     driver-class-name: org.h2.Driver
+#     username: sa
+#     password:
+#   h2:
+#     console:
+#       enabled: true
+#       path: /h2-console

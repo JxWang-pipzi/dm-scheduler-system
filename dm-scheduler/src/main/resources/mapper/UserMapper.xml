@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.UserMapper">
+    <resultMap id="userMap" type="com.example.dm.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="role" property="role"/>
+        <result column="phone" property="phone"/>
+        <result column="real_name" property="realName"/>
+        <result column="avatar" property="avatar"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="userMap">
+        SELECT * FROM `user` WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUsername" resultMap="userMap">
+        SELECT * FROM `user` WHERE username = #{username}
+    </select>
+
+    <select id="selectByEmail" resultMap="userMap">
+        SELECT * FROM `user` WHERE email = #{email}
+    </select>
+    
+    <select id="selectAll" resultMap="userMap">
+        SELECT * FROM `user` ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="userMap">
+        SELECT * FROM `user`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (username LIKE CONCAT('%', #{keyword}, '%')
+                OR real_name LIKE CONCAT('%', #{keyword}, '%')
+                OR phone LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="role != null and role != ''">
+                AND role = #{role}
+            </if>
+        </where>
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM `user`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (username LIKE CONCAT('%', #{keyword}, '%')
+                OR real_name LIKE CONCAT('%', #{keyword}, '%')
+                OR phone LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="role != null and role != ''">
+                AND role = #{role}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user`(username, password, role, phone, real_name, avatar)
+        VALUES(#{username}, #{password}, #{role}, #{phone}, #{realName}, #{avatar})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.User">
+        UPDATE `user`
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM `user` WHERE id = #{id}
+    </delete>
+</mapper>
