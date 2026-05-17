@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.EvaluationMapper">
+    <resultMap id="evaluationMap" type="com.example.dm.entity.Evaluation">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="dm_id" property="dmId"/>
+        <result column="rating" property="rating"/>
+        <result column="comment" property="comment"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="evaluationMap">
+        SELECT * FROM evaluation WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" resultMap="evaluationMap">
+        SELECT * FROM evaluation WHERE user_id = #{userId}
+        ORDER BY created_at DESC, id DESC
+    </select>
+    
+    <select id="selectBySessionId" resultMap="evaluationMap">
+        SELECT * FROM evaluation WHERE session_id = #{sessionId}
+        ORDER BY created_at DESC, id DESC
+    </select>
+    
+    <select id="selectByDmId" resultMap="evaluationMap">
+        SELECT * FROM evaluation WHERE dm_id = #{dmId}
+        ORDER BY created_at DESC, id DESC
+    </select>
+    
+    <select id="selectAll" resultMap="evaluationMap">
+        SELECT * FROM evaluation
+        ORDER BY created_at DESC, id DESC
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Evaluation">
+        INSERT INTO evaluation(user_id, session_id, dm_id, rating, comment)
+        VALUES(#{userId}, #{sessionId}, #{dmId}, #{rating}, #{comment})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Evaluation">
+        UPDATE evaluation
+        SET rating = #{rating}, comment = #{comment}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM evaluation WHERE id = #{id}
+    </delete>
+    
+    <select id="selectAverageRatingByDmId" resultType="java.lang.Double">
+        SELECT AVG(rating) FROM evaluation WHERE dm_id = #{dmId}
+    </select>
+</mapper>

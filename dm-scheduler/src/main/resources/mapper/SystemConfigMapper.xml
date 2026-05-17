@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.SystemConfigMapper">
+    <insert id="insert" parameterType="com.example.dm.entity.SystemConfig">
+        INSERT INTO system_config (config_key, config_value, description, created_at, updated_at)
+        VALUES (#{configKey}, #{configValue}, #{description}, NOW(), NOW())
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.SystemConfig">
+        UPDATE system_config
+        SET config_value = #{configValue},
+            description = #{description},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM system_config WHERE id = #{id}
+    </delete>
+    
+    <select id="selectById" resultType="com.example.dm.entity.SystemConfig">
+        SELECT * FROM system_config WHERE id = #{id}
+    </select>
+    
+    <select id="selectByKey" resultType="com.example.dm.entity.SystemConfig">
+        SELECT * FROM system_config WHERE config_key = #{configKey}
+    </select>
+    
+    <select id="selectAll" resultType="com.example.dm.entity.SystemConfig">
+        SELECT * FROM system_config ORDER BY created_at DESC
+    </select>
+</mapper>

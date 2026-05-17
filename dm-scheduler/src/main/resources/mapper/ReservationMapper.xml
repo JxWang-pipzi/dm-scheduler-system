@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.ReservationMapper">
+    <resultMap id="reservationMap" type="com.example.dm.entity.Reservation">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="players_count" property="playersCount"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="reservationMap">
+        SELECT * FROM reservation WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" resultMap="reservationMap">
+        SELECT * FROM reservation WHERE user_id = #{userId}
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectBySessionId" resultMap="reservationMap">
+        SELECT * FROM reservation WHERE session_id = #{sessionId}
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectByUserAndSession" resultMap="reservationMap">
+        SELECT * FROM reservation WHERE user_id = #{userId} AND session_id = #{sessionId}
+    </select>
+    
+    <select id="selectAll" resultMap="reservationMap">
+        SELECT * FROM reservation ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Reservation">
+        INSERT INTO reservation(user_id, session_id, players_count, status)
+        VALUES(#{userId}, #{sessionId}, #{playersCount}, #{status})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Reservation">
+        UPDATE reservation
+        SET status = #{status},
+            players_count = #{playersCount}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM reservation WHERE id = #{id}
+    </delete>
+    
+    <select id="countBySessionIdAndStatus" resultType="java.lang.Integer">
+        SELECT IFNULL(SUM(players_count), 0) FROM reservation WHERE session_id = #{sessionId} AND status = #{status}
+    </select>
+</mapper>

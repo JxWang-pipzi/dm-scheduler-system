@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.StoreMapper">
+    <resultMap id="storeMap" type="com.example.dm.entity.Store">
+        <id column="id" property="id"/>
+        <result column="store_name" property="storeName"/>
+        <result column="address" property="address"/>
+        <result column="phone" property="phone"/>
+        <result column="description" property="description"/>
+        <result column="room_count" property="roomCount"/>
+        <result column="business_hours" property="businessHours"/>
+        <result column="latitude" property="latitude"/>
+        <result column="longitude" property="longitude"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="storeMap">
+        SELECT * FROM store WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="storeMap">
+        SELECT * FROM store ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.dm.entity.Store" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO store (store_name, address, phone, description, room_count, business_hours, latitude, longitude, status)
+        VALUES (#{storeName}, #{address}, #{phone}, #{description}, #{roomCount}, #{businessHours}, #{latitude}, #{longitude}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.example.dm.entity.Store">
+        UPDATE store
+        <set>
+            <if test="storeName != null">store_name = #{storeName},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="roomCount != null">room_count = #{roomCount},</if>
+            <if test="businessHours != null">business_hours = #{businessHours},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM store WHERE id = #{id}
+    </delete>
+</mapper>

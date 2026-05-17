@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.OrderMapper">
+    <resultMap id="orderMap" type="com.example.dm.entity.Order">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="orderMap">
+        SELECT * FROM order WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" resultMap="orderMap">
+        SELECT * FROM order WHERE user_id = #{userId}
+    </select>
+    
+    <select id="selectBySessionId" resultMap="orderMap">
+        SELECT * FROM order WHERE session_id = #{sessionId}
+    </select>
+    
+    <select id="selectAll" resultMap="orderMap">
+        SELECT * FROM order
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Order">
+        INSERT INTO order(user_id, session_id, create_time)
+        VALUES(#{userId}, #{sessionId}, #{createTime})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Order">
+        UPDATE order
+        SET user_id = #{userId}, session_id = #{sessionId}, create_time = #{createTime}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM order WHERE id = #{id}
+    </delete>
+</mapper>

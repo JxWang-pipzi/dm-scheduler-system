@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.DmScheduleMapper">
+    <resultMap id="scheduleMap" type="com.example.dm.entity.DmSchedule">
+        <id column="id" property="id"/>
+        <result column="dm_id" property="dmId"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="time_slot" property="timeSlot"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule WHERE id = #{id}
+    </select>
+
+    <select id="selectBySessionId" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule WHERE session_id = #{sessionId} LIMIT 1
+    </select>
+
+    <select id="selectByDmIdAndDate" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule WHERE dm_id = #{dmId} AND schedule_date = #{scheduleDate}
+    </select>
+
+    <select id="selectByDate" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule WHERE schedule_date = #{scheduleDate} ORDER BY dm_id, time_slot
+    </select>
+
+    <select id="selectAll" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="scheduleMap">
+        SELECT * FROM dm_schedule
+        <where>
+            <if test="dmId != null">
+                AND dm_id = #{dmId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND schedule_date >= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND schedule_date &lt;= #{endDate}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM dm_schedule
+        <where>
+            <if test="dmId != null">
+                AND dm_id = #{dmId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND schedule_date >= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND schedule_date &lt;= #{endDate}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.example.dm.entity.DmSchedule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dm_schedule(dm_id, schedule_date, time_slot, session_id, status)
+        VALUES(#{dmId}, #{scheduleDate}, #{timeSlot}, #{sessionId}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.example.dm.entity.DmSchedule">
+        UPDATE dm_schedule
+        <set>
+            <if test="dmId != null">dm_id = #{dmId},</if>
+            <if test="scheduleDate != null">schedule_date = #{scheduleDate},</if>
+            <if test="timeSlot != null">time_slot = #{timeSlot},</if>
+            <if test="sessionId != null">session_id = #{sessionId},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM dm_schedule WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBySessionId" parameterType="java.lang.Integer">
+        DELETE FROM dm_schedule WHERE session_id = #{sessionId}
+    </delete>
+
+    <update id="releaseBySessionId" parameterType="java.lang.Integer">
+        UPDATE dm_schedule
+        SET session_id = NULL, status = 'AVAILABLE'
+        WHERE session_id = #{sessionId}
+    </update>
+</mapper>

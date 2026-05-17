@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dm.mapper.ScriptMapper">
+    <resultMap id="scriptMap" type="com.example.dm.entity.Script">
+        <id column="id" property="id"/>
+        <result column="script_name" property="scriptName"/>
+        <result column="type" property="type"/>
+        <result column="difficulty" property="difficulty"/>
+        <result column="need_dm_level" property="needDmLevel"/>
+        <result column="min_players" property="minPlayers"/>
+        <result column="max_players" property="maxPlayers"/>
+        <result column="duration" property="duration"/>
+        <result column="price" property="price"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="tags" property="tags"/>
+        <result column="description" property="description"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    
+    <select id="selectById" resultMap="scriptMap">
+        SELECT * FROM script WHERE id = #{id}
+    </select>
+    
+    <select id="selectAll" resultMap="scriptMap">
+        SELECT * FROM script ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+    
+    <select id="selectByType" resultMap="scriptMap">
+        SELECT * FROM script WHERE type = #{type}
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="scriptMap">
+        SELECT * FROM script
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (script_name LIKE CONCAT('%', #{keyword}, '%')
+                OR description LIKE CONCAT('%', #{keyword}, '%')
+                OR tags LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="difficulty != null and difficulty != ''">
+                AND difficulty = #{difficulty}
+            </if>
+        </where>
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计满足条件的记录数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM script
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (script_name LIKE CONCAT('%', #{keyword}, '%')
+                OR description LIKE CONCAT('%', #{keyword}, '%')
+                OR tags LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="difficulty != null and difficulty != ''">
+                AND difficulty = #{difficulty}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="insert" parameterType="com.example.dm.entity.Script" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO script(script_name, type, difficulty, need_dm_level, min_players, max_players, duration, price, cover_image, tags, description)
+        VALUES(#{scriptName}, #{type}, #{difficulty}, #{needDmLevel}, #{minPlayers}, #{maxPlayers}, #{duration}, #{price}, #{coverImage}, #{tags}, #{description})
+    </insert>
+    
+    <update id="update" parameterType="com.example.dm.entity.Script">
+        UPDATE script
+        <set>
+            <if test="scriptName != null">script_name = #{scriptName},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="difficulty != null">difficulty = #{difficulty},</if>
+            <if test="needDmLevel != null">need_dm_level = #{needDmLevel},</if>
+            <if test="minPlayers != null">min_players = #{minPlayers},</if>
+            <if test="maxPlayers != null">max_players = #{maxPlayers},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM script WHERE id = #{id}
+    </delete>
+
+    <select id="selectHotScripts" resultMap="scriptMap">
+        SELECT * FROM script
+        ORDER BY IFNULL(updated_at, created_at) DESC, id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>
