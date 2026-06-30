@@ -21,6 +21,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.example.dm.util.JwtUtil jwtUtil;
+
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> params) {
         try {
@@ -35,7 +38,7 @@ public class UserController {
             }
             Map<String, Object> data = new java.util.HashMap<>();
             data.put("user", toVO(user));
-            data.put("token", JwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole()));
+            data.put("token", jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole()));
             return Result.success(data);
         } catch (Exception e) {
             return Result.error(5000, "登录失败");
@@ -173,7 +176,7 @@ public class UserController {
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
-            Map<String, Object> claims = JwtUtil.parseToken(token);
+            Map<String, Object> claims = jwtUtil.parseToken(token);
             if (claims == null) {
                 return Result.error(4010, "请先登录");
             }
@@ -302,7 +305,7 @@ public class UserController {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
-        Map<String, Object> claims = JwtUtil.parseToken(token);
+        Map<String, Object> claims = jwtUtil.parseToken(token);
         if (claims == null) {
             return null;
         }

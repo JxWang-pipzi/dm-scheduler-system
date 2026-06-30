@@ -2,6 +2,7 @@ package com.example.dm.config;
 
 import com.example.dm.util.AuthContext;
 import com.example.dm.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,6 +15,9 @@ import java.util.Map;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -37,7 +41,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             token = token.substring(7);
         }
 
-        Map<String, Object> claims = JwtUtil.parseToken(token);
+        Map<String, Object> claims = jwtUtil.parseToken(token);
         if (claims == null) {
             writeJson(response, 401, "登录状态已失效，请重新登录");
             return false;

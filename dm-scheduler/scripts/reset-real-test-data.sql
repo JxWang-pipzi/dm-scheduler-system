@@ -1,5 +1,8 @@
 -- Real testing reset: drop unused legacy tables and clear business data.
 -- Database: dm_scheduler
+--
+-- 注意：执行此脚本前，请将下方 ADMIN_PASSWORD 替换为实际的管理员密码。
+-- 建议使用强密码，不要使用弱密码如 admin123。
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -28,8 +31,9 @@ TRUNCATE TABLE `system_config`;
 
 DELETE FROM `user` WHERE `username` <> 'admin';
 
+-- 请将 'CHANGE_ME_BEFORE_USE' 替换为实际的管理员密码后执行
 INSERT INTO `user` (`username`, `password`, `email`, `role`, `status`, `phone`, `version`)
-VALUES ('admin', 'admin123', 'admin@example.com', 'ADMIN', 'ACTIVE', '13800138000', 0)
+VALUES ('admin', 'CHANGE_ME_BEFORE_USE', 'admin@example.com', 'ADMIN', 'ACTIVE', '13800138000', 0)
 ON DUPLICATE KEY UPDATE
   `password` = VALUES(`password`),
   `email` = VALUES(`email`),

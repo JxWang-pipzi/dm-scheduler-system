@@ -1,6 +1,7 @@
 package com.example.dm;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,10 @@ import javax.sql.DataSource;
 @SpringBootApplication
 @MapperScan(basePackages = "com.example.dm.mapper")
 public class DmApplication {
+
+    @Value("${admin.default-password:admin123}")
+    private String defaultAdminPassword;
+
     public static void main(String[] args) {
         SpringApplication.run(DmApplication.class, args);
     }
@@ -375,13 +380,14 @@ public class DmApplication {
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
             // Ensure admin account exists for clean-environment login.
-            jdbcTemplate.execute("INSERT INTO `user` (`username`, `password`, `email`, `role`, `status`, `phone`, `version`) " +
-                "VALUES ('admin', 'admin123', 'admin@example.com', 'ADMIN', 'ACTIVE', '13800138000', 0) " +
+            jdbcTemplate.update("INSERT INTO `user` (`username`, `password`, `email`, `role`, `status`, `phone`, `version`) " +
+                "VALUES ('admin', ?, 'admin@example.com', 'ADMIN', 'ACTIVE', '13800138000', 0) " +
                 "ON DUPLICATE KEY UPDATE " +
                 "`password` = IF(`password` IS NULL OR `password` = '', VALUES(`password`), `password`), " +
                 "`email` = IF(`email` IS NULL OR `email` = '', VALUES(`email`), `email`), " +
                 "`role` = IF(`role` IS NULL OR `role` = '', VALUES(`role`), `role`), " +
-                "`status` = IF(`status` IS NULL OR `status` = '', VALUES(`status`), `status`);");
+                "`status` = IF(`status` IS NULL OR `status` = '', VALUES(`status`), `status`);",
+                defaultAdminPassword);
             
             System.out.println("Database tables initialized successfully");
         };

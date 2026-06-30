@@ -2,40 +2,52 @@ package com.example.dm.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * JWT 工具类
+ * 密钥从配置文件注入，不再硬编码
+ */
+@Component
 public class JwtUtil {
-    private static final String SECRET_KEY = "REMOVED_JWT_KEY";
-    private static final long EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24小时
-    
-    public static String generateToken(Integer userId, String username, String role) {
+
+    @Value("${jwt.secret:dm-scheduler-default-secret-key-change-in-production}")
+    private String secretKey;
+
+    @Value("${jwt.expiration:86400000}")
+    private long expireTime;
+
+    public String generateToken(Integer userId, String username, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("username", username);
         claims.put("role", role);
-        
+
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expireTime))
                 .setIssuedAt(new Date())
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
-    
-    public static Map<String, Object> parseToken(String token) {
+
+    public Map<String, Object> parseToken(String token) {
         try {
             return Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
             return null;
         }
     }
-    
-    public static boolean validateToken(String token) {
+
+    public boolean validateToken(String token) {
         return parseToken(token) != null;
     }
 }
