@@ -138,6 +138,10 @@ CREATE DATABASE dm_scheduler DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_gener
 mysql -u root -p dm_scheduler < dm-scheduler/scripts/reset-real-test-data.sql
 ```
 
+> 注意：该脚本用于重置测试数据。执行前请将脚本中的 `CHANGE_ME_BEFORE_USE` 替换为实际的管理员密码。
+> 
+> 数据库表结构由后端启动时自动创建（`DmApplication.java` 中的 `ApplicationRunner`），无需手动执行建表脚本。
+
 ### 2. 启动后端
 
 ```bash
@@ -152,9 +156,16 @@ mvn spring-boot:run
 
 后端服务默认运行在 `http://localhost:8081`
 
-数据库连接信息通过环境变量配置：
-- `DB_USERNAME`：数据库用户名（默认 root）
-- `DB_PASSWORD`：数据库密码（默认空）
+数据库连接信息和敏感配置通过环境变量注入：
+
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `DB_USERNAME` | 数据库用户名 | root |
+| `DB_PASSWORD` | 数据库密码 | （空） |
+| `JWT_SECRET` | JWT 签名密钥 | dm-scheduler-default-secret-key-change-in-production |
+| `ADMIN_PASSWORD` | 初始化管理员密码 | admin123 |
+
+> 生产环境务必通过环境变量设置强密码和强密钥，不要使用默认值。
 
 ### 3. 启动前端
 
@@ -169,6 +180,14 @@ npm run serve
 ```
 
 前端开发服务器默认运行在 `http://localhost:8080`
+
+## 🔑 默认账号
+
+| 角色 | 用户名 | 密码 | 说明 |
+|------|--------|------|------|
+| 管理员 | admin | admin123 | 默认密码，可通过 `ADMIN_PASSWORD` 环境变量覆盖 |
+
+> 首次启动后端时，系统会自动创建管理员账号。生产环境请通过环境变量 `ADMIN_PASSWORD` 设置强密码。
 
 ## 📡 API 文档
 
